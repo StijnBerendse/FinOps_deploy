@@ -1,0 +1,63 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "metricAlerts_VM_CPU_perc_name": {
+            "defaultValue": "VM_CPU_perc",
+            "type": "String"
+        },
+        "actionGroups_VM_cpu_perc_alert_externalid": {
+            "defaultValue": "/subscriptions/AD2E13CA-BE14-45AB-92B8-A683975FC0F4/resourceGroups/rg-main/providers/microsoft.insights/actionGroups/VM_cpu_perc_alert",
+            "type": "String"
+        },
+        "resourceTags": {
+            "type": "object",
+            "defaultValue": {
+              "WorkLoadName": "nspoe"
+      }
+    }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "microsoft.insights/metricAlerts",
+            "apiVersion": "2018-03-01",
+            "name": "[parameters('metricAlerts_VM_CPU_perc_name')]",
+            "location": "global",
+            "tags": "[parameters('resourceTags')]",
+            "properties": {
+                "severity": 3,
+                "enabled": true,
+                "scopes": [
+                    "/subscriptions/ad2e13ca-be14-45ab-92b8-a683975fc0f4"
+                ],
+                "evaluationFrequency": "PT15M",
+                "windowSize": "PT30M",
+                "criteria": {
+                    "allOf": [
+                        {
+                            "threshold": 90,
+                            "name": "Metric1",
+                            "metricNamespace": "microsoft.compute/virtualmachines",
+                            "metricName": "Percentage CPU",
+                            "operator": "GreaterThan",
+                            "timeAggregation": "Average",
+                            "skipMetricValidation": false,
+                            "criterionType": "StaticThresholdCriterion"
+                        }
+                    ],
+                    "odata.type": "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria"
+                },
+                "autoMitigate": true,
+                "targetResourceType": "microsoft.compute/virtualmachines",
+                "targetResourceRegion": "westeurope",
+                "actions": [
+                    {
+                        "actionGroupId": "[parameters('actionGroups_VM_cpu_perc_alert_externalid')]",
+                        "webHookProperties": {}
+                    }
+                ]
+            }
+        }
+    ]
+}
